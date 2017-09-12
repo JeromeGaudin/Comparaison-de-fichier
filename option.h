@@ -1,0 +1,34 @@
+#ifndef OPTION_H
+#define OPTION_H
+
+
+#include <stdbool.h>
+
+/*structure ou tout les option de la ligne de commande snt enregistrer*/
+typedef struct{
+  unsigned int optionLettre;
+  unsigned int optionMot;
+} optionC; /* option de la commande */
+
+/*verifie les options et construit la structure option*/
+optionC* ajouter_option(int argc, char ** argv);
+
+/* crée une structure option où sont enregistrer les options saisi dans la ligne de commande*/
+optionC* creer_struct_option();
+
+/*supprime une structure option*/
+void supprimer_struct_option(optionC* opt);
+
+/*ajoute une optionLettre dans la structure*/
+bool ajouter_option_lettre(optionC* option, char lettreOption);
+
+/*ajoute une optionMot dans la structure*/
+bool ajouter_option_mot(optionC* option, char * motOption);
+
+/*verifie si l'option est active ou non*/
+int option_lettre_active(optionC* option, char lettreOption);
+
+/*verifie si l'option est active ou non*/
+int option_mot_active(optionC* option, char* motOption);
+
+#endif
