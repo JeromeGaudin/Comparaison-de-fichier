@@ -2,23 +2,38 @@
 #include <string.h>
 
 #include "algorithmeDeComparaison.h"
+#include "option.h"
 
 #define ERRNO 0 /* si = 1 debug */
 
+option_t* option; /* permet d'optenir la variable golbal du main*/
+
 void ligne_inchange(char** tableau, int ligneDebut/*, int ligneFin*/) {
-  printf(". %s\n", tableau[ligneDebut]);
+	char symbole = '.';
+	if(option_mot_actif("no-symbol")) {
+		symbole = 0;
+	}
+  printf("%c%s\n", symbole, tableau[ligneDebut]);
 }
 
 void ligne_suppression(char** tableau,int ligneDebut, int ligneFin) {
-  do {
-    printf("\33[38;5;196m- %s\33[39m\n", tableau[ligneDebut]);
-    ligneDebut++;
-  }while(ligneDebut < ligneFin);
+	char symbole = '-';
+	if(option_mot_actif("no-symbol")) {
+		symbole = 0;
+	}
+	do {
+	  printf("\33[38;5;196m%c%s\33[39m\n", symbole, tableau[ligneDebut]);
+	  ligneDebut++;
+	}while(ligneDebut < ligneFin);
 }
 
 void ligne_ajout(char** tableau,int ligneDebut, int ligneFin) {
+	char symbole = '+';
+	if(option_mot_actif("no-symbol")) {
+		symbole = 0;
+	}
   do {
-    printf("\33[38;5;82m+ %s\33[39m\n", tableau[ligneDebut]);
+    printf("\33[38;5;82m%c%s\33[39m\n", symbole, tableau[ligneDebut]);
     ligneDebut++;
   }while(ligneDebut < ligneFin);
 }

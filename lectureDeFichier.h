@@ -12,8 +12,10 @@ long occurence_fichier(FILE* f, char occurence);
 /* retourne un long qui correspond a la position de la lettre par rapport a la position du curseur avant la fonction( ne bouge pas le curseur)*/
 long chercher_lettre_dans_fichier(FILE* f, char lettre);
 
-/* gère l'option e (espace)*/
-/* l'option e n'applique a une ligne avant de l'eenregistrer dans la mémoir */
-char* option_e(char ligneLu[], int* tailleRetourne);
+/* gère l'option e et t si on lui passe le string a traiter */
+void gere_option_e_et_t(char ** string);
+
+/* enlève les caractères à exclure avant et après le string*/
+void super_trim(char ** string, char* exclure, int tailleExclure);
 
 #endif

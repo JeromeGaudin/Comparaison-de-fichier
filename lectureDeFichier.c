@@ -6,7 +6,7 @@
 #include "lectureDeFichier.h"
 #include "option.h"
 
-#define ERRNO 1 /* si = 1 debug */
+#define ERRNO 0  /* si = 1 debug */
 
 char** charger_fichier_en_memoire(char* nomFichier, long* nbLignes) {
   FILE* f = fopen(nomFichier, "r");
@@ -28,22 +28,20 @@ char** charger_fichier_en_memoire(char* nomFichier, long* nbLignes) {
 
   for(i=0; i<*nbLignes; i++) {
     int tailleChaine = 0;
-    printf("T_1_%d\n", ftell(f));
     if(premierTour != 1) fseek(f, 1L, SEEK_CUR); /* pour pas que la fonction chercher_lettre_dans_fichier ne retourne le \n sur lequel il est*/
-    printf("T_2\n");
     tailleChaine = (int) chercher_lettre_dans_fichier(f, '\n');
     if(ERRNO) printf("tailleLigne = %d\n", tailleChaine);
     tailleChaine =tailleChaine+1;/* +1 car on va mettre \0 */
-    printf("%d\n", tailleChaine);
-    char* ligneBrut = malloc(1+tailleChaine*sizeof(char));
-    printf("décaration variables\n");
+    char* ligneBrut = malloc(tailleChaine*sizeof(char));
     fgets(ligneBrut, tailleChaine, f);
-    printf("bon\n");
+    gere_option_e_et_t(&ligneBrut);
+    if(option_lettre_active('e') || option_lettre_active('t')) {
+      tailleChaine =strlen(ligneBrut)+1;/* +1 car on va mettre \0 */
+    }
     ligneBrut[tailleChaine-1] = '\0';
     if(ERRNO) printf("Ligne %d brut (taille=%d): %s\n", i, tailleChaine, ligneBrut);
     tailleChaine = strlen(ligneBrut);
     if(ERRNO) printf("Ligne après les options (taille=%d): %s \n", tailleChaine, ligneBrut);
-    /*tailleChaine = tailleChaine +1;  +1 car il faut la place pour le \0*/
     fichierMemoire[i] = (char*) malloc(tailleChaine*sizeof(char));
     if(fichierMemoire[i] == NULL) {
       fprintf(stderr, "Erreur l'allocation de mémoire n'a pas pus être effectuée\n");
@@ -52,11 +50,8 @@ char** charger_fichier_en_memoire(char* nomFichier, long* nbLignes) {
 
     memmove(fichierMemoire[i], ligneBrut, tailleChaine);
     free(ligneBrut);
-    printf("%s \n", fichierMemoire[i]);
     premierTour=0;
-    printf("i=%d < %d\n", i, *nbLignes);
   }
-  puts("fin boucle");
   fclose(f);
   return fichierMemoire;
 }
@@ -81,12 +76,9 @@ long chercher_lettre_dans_fichier(FILE* f, char lettre) {
   long ret = -1;
   int flagTrouver = 0;
   char c;
-  puts("b.1");
   while( feof(f) == 0 && ferror(f) == 0 && flagTrouver == 0) {
     c = getc(f);
-    puts("b.2");
     if(c == lettre) {
-      puts("b.3");
       flagTrouver = 1;
       ret = ftell(f) - savePosition -1; /*-1 car on a dépacé la lettre d'un cran*/
       fseek(f, savePosition, SEEK_SET);
@@ -98,27 +90,66 @@ long chercher_lettre_dans_fichier(FILE* f, char lettre) {
   return ret;
 }
 
-/* me semble faux */
-/*char* option_e(char ligneLu[], int* tailleRetourne) {
-  int i, j, tailleChaine=strlen(ligneLu);
-  bool espace = true;
-  for(i=0; i<tailleChaine && espace; i++) {
-    if(ligneLu[i] == ' ')
-      espace = false;
+void gere_option_e_et_t(char ** string) {
+  char* aExclure;
+  bool eActif=0, tActif=0;
+  if(option_lettre_active('e')) {
+    eActif=1;
   }
-  espace = true;
-  if(i < tailleChaine) {
-    char* ligneFinal = NULL;
-    for(j=tailleChaine-2; j>0 && espace; j++) {*/ /* -2 pour pas prendre le \0 */
-      /*if(ligneLu[j] == ' ')
-        espace = false;
+  if(option_lettre_active('t')) {
+    tActif=1;
+  }
+  if(eActif && tActif) {
+    aExclure = (char*) malloc(2*sizeof(char));
+    aExclure[0] = ' ';
+    aExclure[1] = '\t';
+    super_trim(string, aExclure, 2);
+    free(aExclure);
+  } else if(eActif || tActif) {
+    aExclure = (char*) malloc(sizeof(char));
+    if(eActif) {
+      aExclure[0] = ' ';
+    } else {
+      aExclure[0] = '\t';
     }
-    *tailleRetourne = strlen(ligneLu);
-    ligneLu = &ligneLu[i];
-    strncpy(ligneLu, ligneFinal, j+1);*/ /* car avant on a fais -2 */
-    /**tailleRetourne = *tailleRetourne - (i+j);
-    return ligneFinal;
-  } else {
-    return NULL;
+    super_trim(string, aExclure, 1);
+    free(aExclure);
   }
-}*/
+}
+
+void super_trim(char ** string, char* exclure, int tailleExclure) {
+  int i, j, i2, j2;
+  char * s = *string;
+  int taille=strlen(s);
+  int enlever=0;
+  for(i=0; i != taille; i++) {
+    for(i2=0; i2<tailleExclure && !enlever; i2++) { /* on verifie pour tous les caractères exclue*/
+      if(s[i] == exclure[i2]) { 
+        enlever = 1;
+      }
+    }
+    if( !enlever) {
+      break;  /* aucun caractère enlever donc on s'arrête*/
+    }
+    enlever=0;
+  }
+  if(taille == i){ /*string contient que des caractères a enlever*/
+    string=NULL;
+    return;
+  }
+  for(j=taille-1; j > 0; j--) {
+    for(j2=0; j2<tailleExclure && !enlever; j2++) { /* on verifie pour tous les caractères exclue*/
+      if(s[j] == exclure[j2]) {
+        enlever = 1;
+      }
+    }
+    if( !enlever) {
+      break;  /* aucun caractère enlever donc on s'arrête*/
+    }
+    enlever=0;
+  }
+  int tailleAGarder = j-i+1; /* car j est décrémenté avant d'être testé, pose pas de problème pour i car il commence a 0*/
+  char* n = (char*) malloc(tailleAGarder*sizeof(char));
+  strncpy(n, &s[i], tailleAGarder);
+  *string = n;
+}
