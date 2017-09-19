@@ -1,0 +1,12 @@
+# source compilées
+*.o
+
+# exécutables
+a.out
+comparaisonFichier
+
+# script
+*.sh
+
+# notes
+*.txt

@@ -18,7 +18,7 @@ lectureDeFichier.o: lectureDeFichier.h
 option.o: option.h
 		$(CC) $(FLAGS) option.c -o option.o -c
 
-main.o: main.h lectureDeFichier.h algorithmeDeComparaison.h option.h
+main.o: lectureDeFichier.h algorithmeDeComparaison.h option.h
 	$(CC) $(FLAGS) main.c -o main.o -c
 
 compil: $(FILES)
