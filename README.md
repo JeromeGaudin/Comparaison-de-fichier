@@ -1,7 +1,7 @@
 # Comparaison-de-fichier
 
 
-#ATTENTION
+##ATTENTION
 Cette version du programme ne marche pas, il y a des erreurs dans l'algorithme de comparaisons
 
 Projet fait avec mon temps libre. Compare les lignes de codes de deux fichiers.
